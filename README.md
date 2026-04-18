@@ -1,49 +1,104 @@
-# Projetos Internacionais com IA e CRM
+# Enterprise AI CRM Automation Platform
 
-Este projeto abrange o desenvolvimento de soluções de automação de CRM com IA e assistentes inteligentes de atendimento para empresas no Canadá e nos Estados Unidos.
+A Java 21 and Spring Boot 3 project demonstrating enterprise CRM automation, event-driven lead processing, AI-assisted qualification, integration boundaries, auditability, and cloud-ready architecture.
 
-## 🛠️ Tecnologias
-- Python
-- Chatbots (treinamento com histórico da empresa)
-- Z-API
-- Calendly
-- Redis
-- Make.com
-- Notion
-- D-ID
-- Vapi
+## Why this project exists
 
-## 🚀 Funcionalidades
-- Chatbots inteligentes treinados com base no histórico da empresa.
-- Fluxos automatizados de captação, qualificação e nutrição de leads.
-- Integração com sistemas de CRM e comunicação.
-- Agentes visuais (voz + vídeo) para onboarding automatizado.
+Enterprise automation projects often fail when CRM workflows become a pile of scripts, webhooks, and no-code automations without clear ownership, observability, validation, or retry strategy.
 
-## 🧪 Como usar
+This project demonstrates how to model CRM automation as a backend platform with explicit APIs, domain events, qualification rules, integration adapters, audit logs, and production-oriented boundaries.
+
+## What this project demonstrates
+
+- Java 21 and Spring Boot 3 backend design
+- Modular architecture inspired by microservices
+- Event-driven lead intake and qualification
+- AI-assisted lead scoring with deterministic local logic
+- CRM sync adapter boundary
+- Notification adapter boundary
+- Idempotency for lead intake
+- Audit logging and traceability
+- CI/CD with GitHub Actions
+- Azure production mapping with Service Bus, Functions, Key Vault, and Application Insights
+
+## Architecture
+
+```text
+client/webhook
+  -> Lead Intake API
+      -> idempotency check
+      -> lead validation
+      -> enrichment service
+      -> qualification service
+      -> CRM sync adapter
+      -> notification adapter
+      -> audit log
+      -> domain event publisher
+```
+
+The current implementation is a modular monolith with in-memory storage. The module boundaries are designed to evolve into microservices later.
+
+## Main endpoints
+
+```http
+POST /api/leads
+GET /api/leads/{id}
+GET /api/leads
+POST /api/leads/{id}/qualify
+GET /api/integrations/status
+```
+
+## Quick start
+
 ```bash
-git clone https://github.com/Raoni022/Projetos_Internacionais_IA_CRM.git
-cd Projetos_Internacionais_IA_CRM
-pip install -r requirements.txt
-# Configurar variáveis de ambiente e executar o script principal
-python src/main.py
+mvn test
+mvn spring-boot:run
 ```
 
-## 📄 Estrutura do Projeto
-```
-Projetos_Internacionais_IA_CRM/
-├── README.md
-├── .gitignore
-├── requirements.txt
-├── src/
-│   ├── main.py
-│   └── utils.py
-├── docs/
-│   ├── fluxo-n8n.json
-│   └── imagens/
-├── examples/
-│   ├── input.json
-│   └── output.json
-└── .env.example
+Swagger UI:
+
+```text
+http://localhost:8080/swagger-ui.html
 ```
 
+## Example request
 
+```bash
+curl -X POST http://localhost:8080/api/leads \
+  -H "Content-Type: application/json" \
+  -H "Idempotency-Key: demo-lead-001" \
+  -d '{
+    "fullName": "Alex Morgan",
+    "email": "alex@example.com",
+    "company": "Northstar Logistics",
+    "country": "Canada",
+    "source": "website",
+    "message": "We need CRM automation and AI lead qualification for our sales team."
+  }'
+```
+
+## Azure production mapping
+
+| Local component | Azure production mapping |
+|---|---|
+| Spring Boot API | AKS or Azure App Service |
+| Domain events | Azure Service Bus |
+| Background enrichment | Azure Functions |
+| Secrets | Azure Key Vault |
+| Observability | Azure Monitor / Application Insights |
+| Persistent storage | Azure Database for PostgreSQL |
+| CI/CD | GitHub Actions |
+
+This repository does not claim to be deployed to Azure. It demonstrates a deployment-ready architecture direction.
+
+## Trade-offs
+
+- Storage is in-memory for local simplicity.
+- AI qualification is deterministic and transparent instead of calling a paid LLM.
+- Integration adapters are mocked to avoid external credentials.
+- The architecture is intentionally easy to split into services later.
+
+## Author
+
+Raoni Medeiros  
+AI Automation & Systems Engineer
